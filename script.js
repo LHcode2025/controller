@@ -1,11 +1,26 @@
 let gamepadInfo = document.getElementById('gamepad-info');
-let buttonsDiv = document.getElementById('buttons');
+let buttonOverlay = document.getElementById('button-overlay');
 
-const buttonNames = [
-    'A', 'B', 'X', 'Y', 'LB', 'RB', 'Back', 'Start', 
-    'LS Button', 'RS Button', 'D-Pad Up', 'D-Pad Down', 
-    'D-Pad Left', 'D-Pad Right'
-];
+const buttonPositions = {
+    0: { top: '40%', left: '60%', size: '20px' }, // A
+    1: { top: '30%', left: '35%', size: '20px' }, // B
+    2: { top: '40%', left: '10%', size: '20px' }, // X
+    3: { top: '30%', left: '25%', size: '20px' }, // Y
+    // Add more buttons if necessary
+};
+
+function createHighlightButton(index) {
+    const highlight = document.createElement('div');
+    highlight.classList.add('button-highlight');
+    highlight.style.top = buttonPositions[index].top;
+    highlight.style.left = buttonPositions[index].left;
+    highlight.style.width = buttonPositions[index].size;
+    highlight.style.height = buttonPositions[index].size;
+    buttonOverlay.appendChild(highlight);
+    return highlight;
+}
+
+let highlights = {};
 
 function update() {
     const gamepads = navigator.getGamepads();
@@ -20,18 +35,13 @@ function update() {
 
     if (gamepad) {
         gamepadInfo.textContent = `Connected to ${gamepad.id}`;
-        buttonsDiv.innerHTML = ''; // Clear previous buttons
+        buttonOverlay.innerHTML = ''; // Clear previous highlights
 
         gamepad.buttons.forEach((button, index) => {
-            let buttonDiv = document.createElement('div');
-            buttonDiv.classList.add('button');
-            buttonDiv.textContent = buttonNames[index] || `Button ${index}`;
-
-            if (button.pressed) {
-                buttonDiv.classList.add('active');
+            if (button.pressed && buttonPositions[index]) {
+                const highlight = createHighlightButton(index);
+                highlights[index] = highlight; // Store highlights if needed
             }
-
-            buttonsDiv.appendChild(buttonDiv);
         });
     }
 
@@ -46,5 +56,5 @@ window.addEventListener('gamepadconnected', (event) => {
 window.addEventListener('gamepaddisconnected', (event) => {
     console.log(`Gamepad disconnected: ${event.gamepad.id}`);
     gamepadInfo.textContent = 'No gamepad connected.';
-    buttonsDiv.innerHTML = '';
+    buttonOverlay.innerHTML = '';
 });
